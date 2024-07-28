@@ -1,6 +1,8 @@
-import Component    from '../../../node_modules/neo.mjs/src/component/Base.mjs';
-import TabContainer from '../../../node_modules/neo.mjs/src/tab/Container.mjs';
-import Viewport     from '../../../node_modules/neo.mjs/src/container/Viewport.mjs';
+import Container               from '../../../node_modules/neo.mjs/src/container/Base.mjs';
+import HeaderContainer         from './HeaderContainer.mjs';
+import MainContainerController from './MainContainerController.mjs';
+import TabContainer            from '../../../node_modules/neo.mjs/src/tab/Container.mjs';
+import Viewport                from '../../../node_modules/neo.mjs/src/container/Viewport.mjs';
 
 /**
  * @class Website.view.MainContainer
@@ -14,45 +16,80 @@ class MainContainer extends Viewport {
          */
         className: 'Website.view.MainContainer',
         /**
-         * @member {Boolean} autoMount=true
+         * @member {String[]} baseCls=['website-main-container','neo-viewport']
          */
-        autoMount: true,
+        baseCls: ['website-main-container', 'neo-viewport'],
         /**
-         * @member {Object[]} items
+         * @member {Neo.controller.Component} controller=MainContainerController
+         */
+        controller: MainContainerController,
+        /**
+         * @member {Object} layout={ntype: 'hbox',align: 'stretch'}
+         */
+        layout: {ntype: 'hbox', align: 'stretch'},
+        /**
+         * @member {Array} items
          */
         items: [{
-            module: TabContainer,
-            height: 300,
-            width : 500,
-            style : {flex: 'none', margin: '20px'},
-
-            itemDefaults: {
-                module: Component,
-                cls   : ['neo-examples-tab-component'],
-                style : {padding: '20px'},
-            },
-
-            items: [{
-                tabButtonConfig: {
-                    iconCls: 'fa fa-home',
-                    text   : 'Tab 1'
-                },
-                vdom: {innerHTML: 'Welcome to your new Neo App.'}
+            module: Container,
+            cls   : ['website-center-region'],
+            layout: {ntype: 'vbox', align: 'stretch'},
+            items : [{
+                module   : HeaderContainer,
+                flex     : 'none',
+                reference: 'header-container'
             }, {
-                tabButtonConfig: {
-                    iconCls: 'fa fa-play-circle',
-                    text   : 'Tab 2'
-                },
-                vdom: {innerHTML: 'Have fun creating something awesome!'}
+                module     : TabContainer,
+                activeIndex: null, // render no items initially
+                cls        : ['website-main-tabcontainer', 'neo-tab-container'],
+                flex       : 1,
+                reference  : 'main-tab-container',
+                sortable   : true,
+
+                items: [{
+                    module         : () => import('./home/TabContainer.mjs'),
+                    reference      : 'home',
+                    tabButtonConfig: {
+                        editRoute: false,
+                        iconCls  : 'fa fa-home',
+                        route    : 'mainview=home',
+                        text     : 'Home'
+                    }
+                }, {
+                    module         : () => import('./blog/Container.mjs'),
+                    reference      : 'blog',
+                    tabButtonConfig: {
+                        editRoute: false,
+                        iconCls  : 'fa fa-rss',
+                        reference: 'blog-header-button',
+                        route    : 'mainview=blog',
+                        text     : 'Blog'
+                    }
+                }, {
+                    module         : () => import('./examples/TabContainer.mjs'),
+                    reference      : 'examples',
+                    tabButtonConfig: {
+                        editRoute: false,
+                        iconCls  : 'fa fa-images',
+                        route    : 'mainview=examples',
+                        text     : 'Examples'
+                    }
+                }, {
+                    module         : () => import('./examples/List.mjs'),
+                    reference      : 'docs',
+                    storeUrl       : '../../apps/website/data/docs.json',
+                    tabButtonConfig: {
+                        editRoute: false,
+                        iconCls  : 'fa fa-hands-helping',
+                        route    : 'mainview=docs',
+                        text     : 'Docs'
+                    }
+                }]
             }]
-        }],
-        /*
-         * @member {Object} layout={ntype:'fit'}
-         */
-        layout: {ntype: 'fit'}
+        }]
     }
 }
 
-Neo.applyClassConfig(MainContainer);
+Neo.setupClass(MainContainer);
 
 export default MainContainer;
